@@ -149,6 +149,32 @@ def get_brand_insights(request: BrandInsightsRequest):
     except Exception as e:
         logger.error(f"Internal error: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
+from typing import List
+
+class CompetitorInsightsRequest(BaseModel):
+    website_url: str
+
+class CompetitorInsightsResponse(BaseModel):
+    competitors: List[str]
+    insights: dict
+
+@app.post("/competitor-insights", response_model=CompetitorInsightsResponse)
+def get_competitor_insights(request: CompetitorInsightsRequest):
+    # For demo, use a hardcoded competitor list
+    competitors = [
+        "https://hairoriginals.com",
+        "https://memy.co.in"
+    ]
+    insights = {}
+    for comp_url in competitors:
+        try:
+            comp_request = BrandInsightsRequest(website_url=comp_url)
+            insights[comp_url] = get_brand_insights(comp_request)
+        except Exception as e:
+            insights[comp_url] = {"error": str(e)}
+    return CompetitorInsightsResponse(competitors=competitors, insights=insights)
+
 # Error handling middleware can be added here if needed
 
 if __name__ == "__main__":
